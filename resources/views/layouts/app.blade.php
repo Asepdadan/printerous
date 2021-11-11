@@ -19,7 +19,7 @@
 
     <!-- Styles -->
     <link href="{{ asset('css/app.css') }}" rel="stylesheet">
-
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('img/pt_pandu.PNG') }}"/>
     @stack('style')
 </head>
 <body>
