@@ -31,10 +31,10 @@ class OrganizationController extends Controller
             $user = Auth::user();
 
             $organizaton = Organization::query();
-            if ($user->isUserAccountManager()) {
-                $userOrganization = $user->userOrganization->pluck('organization_id');
-                $organizaton = $organizaton->whereIn('id', $userOrganization);
-            }
+            $userOrganization = $user->userOrganization->pluck('organization_id')->toArray();
+            //if ($user->isUserAccountManager()) {
+            //    $organizaton = $organizaton->whereIn('id', $userOrganization);
+            //}
 
             return DataTables::of($organizaton)
                 ->editColumn('created_at', function($organization) {
@@ -46,23 +46,25 @@ class OrganizationController extends Controller
                 ->addColumn('details_url', function($organization) {
                     return url('organization/details-person/' . $organization->id);
                 })
-                ->addColumn('action', function($organization) {
+                ->addColumn('action', function($organization) use ($userOrganization){
                     $html = "";
 
                     $html .= '<a class="btn btn-info" href="'.url("organization/".$organization->id.'').'">Detail</a>';
 
+                    if (in_array($organization->id, $userOrganization)):
+                        if (Gate::allows('create-organization')) {
+                            $html .= '&nbsp;&nbsp;<a class="btn btn-warning" href="'.url("organization/".$organization->id.'/edit').'">Edit</a>';
+                        }
 
-                    if (Gate::allows('create-organization')) {
-                        $html .= '&nbsp;&nbsp;<a class="btn btn-warning" href="'.url("organization/".$organization->id.'/edit').'">Edit</a>';
-                    }
+                        if (Gate::allows('create-organization')) {
+                            $html .= '&nbsp;&nbsp;<a class="btn btn-danger" href="#" onclick="hapus(' . $organization->id . ')" data-href="' . url("organizatio/" . $organization->id) . '">Hapus</a>';
+                        }
 
-                    if (Gate::allows('create-organization')) {
-                        $html .= '&nbsp;&nbsp;<a class="btn btn-danger" href="#" onclick="hapus(' . $organization->id . ')" data-href="' . url("organizatio/" . $organization->id) . '">Hapus</a>';
-                    }
+                        if (Gate::allows('create-person')) {
+                            $html .= '&nbsp;&nbsp;<a class="btn btn-primary" href="' . url('organization/' . $organization->id . '/create') . '">Tambah Person</a>';
+                        }
+                    endif;
 
-                    if (Gate::allows('create-person')) {
-                        $html .= '&nbsp;&nbsp;<a class="btn btn-primary" href="' . url('organization/' . $organization->id . '/create') . '">Tambah Person</a>';
-                    }
                     return $html;
                 })
                 ->rawColumns(['action', 'logo'])
