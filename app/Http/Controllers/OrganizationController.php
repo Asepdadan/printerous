@@ -32,9 +32,6 @@ class OrganizationController extends Controller
 
             $organizaton = Organization::query();
             $userOrganization = $user->userOrganization->pluck('organization_id')->toArray();
-            //if ($user->isUserAccountManager()) {
-            //    $organizaton = $organizaton->whereIn('id', $userOrganization);
-            //}
 
             return DataTables::of($organizaton)
                 ->editColumn('created_at', function($organization) {
